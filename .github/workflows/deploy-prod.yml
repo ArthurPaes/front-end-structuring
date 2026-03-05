@@ -1,0 +1,64 @@
+name: Deploy → Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # never cancel a prod deploy mid-flight
+
+jobs:
+  deploy:
+    name: Build & Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production # ← requires manual approval in GitHub settings
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (production mode)
+        run: npm run build
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+
+      # ── Option A: Deploy to Vercel ───────────────────────
+      # - uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+      #     vercel-args: '--prod'
+
+      # ── Option B: Deploy to S3 + CloudFront ──────────────
+      # - uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
+      # - run: |
+      #     aws s3 sync dist/ s3://${{ vars.S3_BUCKET_PROD }} --delete
+      #     aws cloudfront create-invalidation \
+      #       --distribution-id ${{ vars.CF_DISTRIBUTION_PROD }} \
+      #       --paths "/*"
+
+      # ── Notify Sentry of new release ─────────────────────
+      # - uses: getsentry/action-release@v1
+      #   env:
+      #     SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      #     SENTRY_ORG: my-org
+      #     SENTRY_PROJECT: my-project
+      #   with:
+      #     environment: production
+
+      - name: Deploy placeholder
+        run: echo "🚀 Production deploy — wire up your hosting provider above"

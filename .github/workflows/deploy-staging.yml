@@ -1,0 +1,54 @@
+name: Deploy → Staging
+
+on:
+  push:
+    branches: [develop]
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build (staging mode)
+        run: npm run build -- --mode staging
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_SENTRY_DSN: ${{ vars.VITE_SENTRY_DSN }}
+
+      # ── Option A: Deploy to Vercel ───────────────────────
+      # - uses: amondnet/vercel-action@v25
+      #   with:
+      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
+      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      # ── Option B: Deploy to S3 + CloudFront ──────────────
+      # - uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
+      # - run: |
+      #     aws s3 sync dist/ s3://${{ vars.S3_BUCKET_STAGING }} --delete
+      #     aws cloudfront create-invalidation \
+      #       --distribution-id ${{ vars.CF_DISTRIBUTION_STAGING }} \
+      #       --paths "/*"
+
+      - name: Deploy placeholder
+        run: echo "🚀 Staging deploy — wire up your hosting provider above"

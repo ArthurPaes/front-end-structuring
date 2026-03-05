@@ -1,0 +1,116 @@
+
+//This file is used for configuring the TypeScript compiler for the application code in a React project. 
+// It specifies compiler options, module resolution, type checking rules, and other settings that control how TypeScript processes the source files in the src/ directory.
+{
+  "compilerOptions": {
+    // ── Build info cache ──────────────────────────────────
+    // Stores incremental compilation state so `tsc` only re-checks files
+    // that actually changed — makes type-checking faster on every run.
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+
+    // ── Output target ─────────────────────────────────────
+    // Compile down to ES2022 syntax. Vite handles the rest — no need to
+    // target older browsers here because Vite / Rollup does that in the build step.
+    "target": "ES2022",
+
+    // Use Object.defineProperty() semantics for class fields — matches
+    // how modern JS engines (and the React Compiler) actually handle them.
+    "useDefineForClassFields": true,
+
+    // Type definitions the compiler should know about:
+    //   ES2022     — modern JS globals (Array.at, Object.hasOwn, etc.)
+    //   DOM        — browser APIs: document, window, fetch, etc.
+    //   DOM.Iterable — makes DOM collections (NodeList, HTMLCollection) iterable in for-of loops
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+
+    // ── Module system ─────────────────────────────────────
+    // Emit ESNext import/export syntax. Vite consumes ES modules natively
+    // in dev and Rollup bundles them for production — no CommonJS needed.
+    "module": "ESNext",
+
+    // Inject global type declarations without explicit imports:
+    //   vite/client   — types for import.meta.env, import.meta.hot, ?raw imports, etc.
+    //   vitest/globals — types for describe/it/expect/beforeAll etc. in test files
+    //                    so you don't need to import them in every test file
+    "types": ["vite/client", "vitest/globals"],
+
+    // Skip type-checking inside node_modules. Third-party packages sometimes
+    // ship slightly broken .d.ts files — this prevents their errors from
+    // blocking your build. Your own code is still fully checked.
+    "skipLibCheck": true,
+
+    /* Bundler mode — these options are designed for use with Vite/esbuild/Rollup */
+
+    // Tell TypeScript that a bundler (Vite) handles module resolution at runtime.
+    // Enables features like extensionless imports and package.json "exports" fields
+    // without requiring Node.js-style resolution rules.
+    "moduleResolution": "bundler",
+
+    // Allow importing files with explicit .ts/.tsx extensions in source code.
+    // Required when moduleResolution is "bundler". Only valid with noEmit: true
+    // because TypeScript won't rewrite the extensions in output (the bundler does).
+    "allowImportingTsExtensions": true,
+
+    // Preserve import/export statements exactly as written — don't transform or
+    // elide them. Prevents subtle bugs where TypeScript removes an import it thinks
+    // is type-only but the bundler actually needs it at runtime.
+    "verbatimModuleSyntax": true,
+
+    // Treat every file as a module (even if it has no import/export).
+    // Prevents accidental global scope pollution from files that look like scripts.
+    "moduleDetection": "force",
+
+    // Don't emit any JS files — Vite handles compilation and output.
+    // TypeScript is used only for type-checking here.
+    "noEmit": true,
+
+    // Transform JSX into React 19's automatic runtime (react/jsx-runtime).
+    // You don't need `import React from 'react'` at the top of every file.
+    "jsx": "react-jsx",
+
+    /* Absolute imports */
+
+    // Makes "." (the project root) the starting point for non-relative imports.
+    // Required for the @/ path alias below to work.
+    "baseUrl": ".",
+
+    // Maps @/anything → src/anything.
+    // Must match the alias in vite.config.ts so both the type checker and
+    // the bundler resolve the same files.
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    /* Linting — TypeScript as a strict code quality tool */
+
+    // Enables a large set of safety checks in one flag:
+    // strictNullChecks, strictFunctionTypes, strictBindCallApply,
+    // strictPropertyInitialization, noImplicitAny, noImplicitThis, etc.
+    "strict": true,
+
+    // Error on variables declared but never read — keeps code tidy.
+    "noUnusedLocals": true,
+
+    // Error on function parameters declared but never used.
+    // Prefix with _ (e.g. _event) to intentionally suppress this for a parameter.
+    "noUnusedParameters": true,
+
+    // Disallow syntax that TypeScript adds but that plain JavaScript can't erase
+    // at compile time (e.g. `enum`, `namespace`, parameter decorators).
+    // Keeps .ts files compatible with tools that strip types without transforming —
+    // important for the React Compiler and native TS stripping in Node 22+.
+    "erasableSyntaxOnly": true,
+
+    // Error if a switch-case falls through to the next case without a break/return.
+    // A common source of accidental bugs.
+    "noFallthroughCasesInSwitch": true,
+
+    // Error on import side-effects that aren't explicitly declared.
+    // e.g. `import './setup'` must be intentional — prevents accidental
+    // tree-shaking surprises where a side-effect import gets dropped.
+    "noUncheckedSideEffectImports": true
+  },
+
+  // Only type-check files inside src/ — config files at the root use tsconfig.node.json.
+  "include": ["src"]
+}

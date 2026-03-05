@@ -1,0 +1,30 @@
+/*
+ * Global styles — import Tailwind + reset + tokens.
+ *
+ * TAILWIND v4: Uses @import "tailwindcss" (single import).
+ * Config is done via CSS-first approach or tailwind.config.ts.
+ */
+
+@import 'tailwindcss';
+@import './reset.css';
+@import './tokens.css';
+
+/* ── Base typography ─────────────────────────────────────── */
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/* ── Utility classes that complement Tailwind ──────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -1,0 +1,10 @@
+.button {
+  /* CSS Modules scoped styles — complement Tailwind for complex/animated states */
+  position: relative;
+  user-select: none;
+  cursor: pointer;
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.98);
+}
